@@ -1,0 +1,20 @@
+version: "2"
+sql:
+  - schema: "db/migrations/wallets"
+    # remember to change query dir
+    queries: "db/queries/wallets.sql"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "sqlc"
+        # remember to change out dir when gen domain
+        out: "db/sqlc/wallets"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        emit_empty_slices: true
+        overrides:
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"

@@ -1,32 +1,44 @@
 package kafka
 
-import (
-	"context"
+// import (
+// 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+// 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
+// )
 
-	"github.com/segmentio/kafka-go"
-	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
-)
+// type Producer interface {
+// 	PublishMessage(msg *kafka.Message) error
+// 	Close()
+// }
 
-type Producer interface {
-	PublishMessage(ctx context.Context, msgs ...kafka.Message) error
-	Close() error
-}
+// type producer struct {
+// 	log     logger.Logger
+// 	brokers string
+// 	w       *kafka.Producer
+// }
 
-type producer struct {
-	log     logger.Logger
-	brokers []string
-	w       *kafka.Writer
-}
+// // NewProducer create new kafka producer
+// func NewProducer(log logger.Logger, brokers string) *producer {
+// 	w, err := NewWriter(brokers)
+// 	if err != nil {
+// 		return nil
+// 	}
 
-// NewProducer create new kafka producer
-func NewProducer(log logger.Logger, brokers []string) *producer {
-	return &producer{log: log, brokers: brokers, w: NewWriter(brokers, kafka.LoggerFunc(log.Errorf))}
-}
+// 	return &producer{log: log, brokers: brokers, w: w}
+// }
 
-func (p *producer) PublishMessage(ctx context.Context, msgs ...kafka.Message) error {
-	return p.w.WriteMessages(ctx, msgs...)
-}
+// func (p *producer) PublishMessage(msgs *kafka.Message) error {
+// 	deliveryChan := make(chan kafka.Event)
+// 	err := p.w.Produce(msgs, deliveryChan)
 
-func (p *producer) Close() error {
-	return p.w.Close()
-}
+// 	<-deliveryChan
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (p *producer) Close() {
+// 	p.w.Close()
+// }

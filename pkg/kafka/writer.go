@@ -1,22 +1,18 @@
 package kafka
 
-import (
-	"github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/compress"
-)
+// import (
+// 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+// )
 
-// NewWriter create new configured kafka writer
-func NewWriter(brokers []string, errLogger kafka.Logger) *kafka.Writer {
-	w := &kafka.Writer{
-		Addr:         kafka.TCP(brokers...),
-		Balancer:     &kafka.LeastBytes{},
-		RequiredAcks: writerRequiredAcks,
-		MaxAttempts:  writerMaxAttempts,
-		ErrorLogger:  errLogger,
-		Compression:  compress.Snappy,
-		ReadTimeout:  writerReadTimeout,
-		WriteTimeout: writerWriteTimeout,
-		Async:        false,
-	}
-	return w
-}
+// // NewWriter create new configured kafka writer
+// func NewWriter(brokers string) (*kafka.Producer, error) {
+// 	return kafka.NewProducer(&kafka.ConfigMap{
+// 		"bootstrap.servers":  brokers,
+// 		"acks":               writerRequiredAcks,
+// 		"retries":            writerMaxAttempts,
+// 		"compression.type":   "snappy",
+// 		"socket.timeout.ms":  writerReadTimeout.Milliseconds(),
+// 		"request.timeout.ms": writerWriteTimeout.Milliseconds(),
+// 		"linger.ms":          0,
+// 	})
+// }

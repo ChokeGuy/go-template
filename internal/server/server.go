@@ -9,9 +9,9 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/segmentio/kafka-go"
+	"github.com/pkg/errors"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
+	"gitlab.rinznetwork.com/gocryptowallet/go-template/db"
 	productHandler "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/handler"
 	productService "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/service"
 	walletHandler "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/wallets/handler"
@@ -19,19 +19,21 @@ import (
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/middlewares"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/interceptors"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
+	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/postgres"
 )
 
 type server struct {
-	log       logger.Logger
-	cfg       *config.Config
-	v         *validator.Validate
-	server    *http.Server
-	kafkaConn *kafka.Conn
-	ps        *productService.ProductService
-	ws        *walletService.WalletService
-	im        interceptors.InterceptorManager
-	pgConn    *pgxpool.Pool
-	mw        middlewares.MiddlewareManager
+	log    logger.Logger
+	cfg    *config.Config
+	v      *validator.Validate
+	server *http.Server
+	// kafkaConn *kafka.Consumer
+	ps       *productService.ProductService
+	ws       *walletService.WalletService
+	im       interceptors.InterceptorManager
+	writerDB *db.Store
+	readerDB *db.Store
+	mw       middlewares.MiddlewareManager
 }
 
 func NewServer(log logger.Logger, cfg *config.Config) *server {
@@ -44,32 +46,33 @@ func (s *server) Run() error {
 
 	s.im = interceptors.NewInterceptorManager(s.log)
 
-	// pgxConn, err := postgres.NewPgxConn(s.cfg.POSTGRES_URL)
-	// if err != nil {
-	// 	return errors.Wrap(err, "postgresql.NewPgxConn")
-	// }
-	// s.pgConn = pgxConn
-	// s.log.Infof("postgres connected: %v", pgxConn.Stat().TotalConns())
-	// defer pgxConn.Close()
+	readerPgxConn, err := postgres.NewPgxConn(s.cfg.READER_POSTGRES_URL)
+	if err != nil {
+		return errors.Wrap(err, "postgresql.NewPgxConn")
+	}
+	s.readerDB = db.NewStore(readerPgxConn)
+
+	s.log.Infof("reader postgres connected: %v", readerPgxConn.Stat().TotalConns())
+	defer readerPgxConn.Close()
+
+	writerPgxConn, err := postgres.NewPgxConn(s.cfg.WRITER_POSTGRES_URL)
+	if err != nil {
+		return errors.Wrap(err, "postgresql.NewPgxConn")
+	}
+	s.writerDB = db.NewStore(writerPgxConn)
+
+	s.log.Infof("writer postgres connected: %v", writerPgxConn.Stat().TotalConns())
+	defer writerPgxConn.Close()
 
 	// kafkaProducer := kafkaClient.NewProducer(s.log, s.cfg.KAFKA_BROKER)
 	// defer kafkaProducer.Close() // nolint: errcheck
 
-	// if err := s.connectKafkaBrokers(ctx); err != nil {
-	// 	return errors.Wrap(err, "s.connectKafkaBrokers")
-	// }
-	// defer s.kafkaConn.Close() // nolint: errcheck
-
-	// if s.cfg.INIT_TOPICS {
-	// 	s.initKafkaTopics(ctx)
-	// }
-
 	s.server = &http.Server{
-		Addr: ":8080",
+		Addr: ":" + s.cfg.PORT,
 	}
 
 	// s.ps = productService.NewProductService(s.log, s.cfg, kafkaProducer)
-	s.ws = walletService.NewWalletService(s.log, s.cfg)
+	s.ws = walletService.NewWalletService(s.log, s.cfg, s.writerDB, s.readerDB)
 
 	router := mux.NewRouter().PathPrefix(s.cfg.PREFIX_PATH).Subrouter()
 

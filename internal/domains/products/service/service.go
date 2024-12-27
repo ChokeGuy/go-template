@@ -4,7 +4,6 @@ import (
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/commands"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/queries"
-	kafkaClient "gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 )
 
@@ -13,8 +12,8 @@ type ProductService struct {
 	Queries  *queries.ProductQueries
 }
 
-func NewProductService(log logger.Logger, cfg *config.Config, kafkaProducer kafkaClient.Producer) *ProductService {
-	createProductHandler := commands.NewCreateProductHandler(log, cfg, kafkaProducer)
+func NewProductService(log logger.Logger, cfg *config.Config) *ProductService {
+	createProductHandler := commands.NewCreateProductHandler(log, cfg)
 
 	getProductByIdHandler := queries.NewGetProductByIdHandler(log, cfg)
 

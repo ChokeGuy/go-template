@@ -11,7 +11,7 @@ import (
 )
 
 type Querier interface {
-	GetWalletById(ctx context.Context, walletID uuid.UUID) (GetWalletByIdRow, error)
+	GetWalletByUserId(ctx context.Context, userID uuid.UUID) (GetWalletByUserIdRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -2,36 +2,42 @@ package commands
 
 import (
 	"context"
-	"encoding/json"
+	"time"
 
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
+	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc/wallets"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/wallets/dto"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 )
 
-func NewCreateWalletHandler(log logger.Logger, cfg *config.Config) *createWalletHandler {
-	return &createWalletHandler{log: log, cfg: cfg}
+func NewCreateWalletHandler(
+	log logger.Logger,
+	cfg *config.Config,
+	// kafkaProducer kafkaClient.Producer,
+	command sqlc.Querier,
+	querier sqlc.Querier,
+) *createWalletHandler {
+	return &createWalletHandler{log: log, cfg: cfg, command: command, querier: querier}
 }
 
-func (c *createWalletHandler) Handle(ctx context.Context, command *dto.CreateWalletDto) ([]byte, error) {
-	createDto := &dto.CreateWalletDto{
-		WalletID:   command.WalletID,
-		UserID:     command.UserID,
-		PublicKey:  command.PublicKey,
-		PrivateKey: command.PrivateKey,
+func (c *createWalletHandler) Handle(ctx context.Context, createDto *dto.CreateWalletDto) (dto.CreateWalletResponseDto, error) {
+	// _, err := c.querier.GetWalletByUserId(ctx, createDto.UserID)
+	// if err != nil {
+	// 	return dto.CreateWalletResponseDto{}, err
+	// }
+
+	response := dto.CreateWalletResponseDto{
+		UserID:    createDto.UserID,
+		BackupKey: createDto.BackupKey,
+		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	}
 
-	dtoBytes, err := json.Marshal(createDto)
-	if err != nil {
-		return nil, err
-	}
+	return response, nil
 
-	// return c.kafkaProducer.PublishMessage(ctx, kafka.Message{
-	// 	// Topic: c.cfg.KafkaTopics.WalletCreate.TopicName,
-	// 	Topic: "wallet-create",
-	// 	Value: dtoBytes,
-	// 	Time:  time.Now().UTC(),
+	// return c.kafkaProducer.PublishMessage(&kafka.Message{
+	// 	TopicPartition: kafka.TopicPartition{Topic: &topics.CREATE_WALLET_TOPIC, Partition: kafka.PartitionAny},
+	// 	Value:          response,
+	// 	Timestamp:      time.Now().UTC(),
 	// })
-	return dtoBytes, nil
-
 }

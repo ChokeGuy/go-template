@@ -6,13 +6,14 @@ import (
 
 // Struct config
 type Config struct {
-	SERVER_ADDRESS string   `mapstruture:"SERVER_ADDRESS"`
-	PORT           string   `mapstruture:"PORT"`
-	KAFKA_BROKER   []string `mapstruture:"KAFKA_URL"`
-	POSTGRES_URL   string   `mapstruture:"POSTGRES_URL"`
-	INIT_TOPICS    bool     `mapstruture:"INIT_TOPICS"`
-	KAFKA_GROUP_ID string   `mapstruture:"KAFKA_GROUP_ID"`
-	PREFIX_PATH    string   `mapstruture:"PREFIX_PATH"`
+	SERVER_ADDRESS      string   `mapstruture:"SERVER_ADDRESS"`
+	PORT                string   `mapstruture:"PORT"`
+	KAFKA_BROKER        []string `mapstruture:"KAFKA_URL"`
+	WRITER_POSTGRES_URL string   `mapstruture:"WRITER_POSTGRES_URL"`
+	READER_POSTGRES_URL string   `mapstruture:"READER_POSTGRES_URL"`
+	INIT_TOPICS         bool     `mapstruture:"INIT_TOPICS"`
+	KAFKA_GROUP_ID      string   `mapstruture:"KAFKA_GROUP_ID"`
+	PREFIX_PATH         string   `mapstruture:"PREFIX_PATH"`
 }
 
 // Use viper to load config from file .env

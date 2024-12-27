@@ -1,9 +1,9 @@
 package queries
 
 type WalletQueries struct {
-	GetWalletById GetWalletByIdHandler
+	GetWalletByUserId GetWalletByUserIdHandler
 }
 
-func NewWalletQueries(getWalletById GetWalletByIdHandler) *WalletQueries {
-	return &WalletQueries{GetWalletById: getWalletById}
+func NewWalletQueries(getWalletByUserId GetWalletByUserIdHandler) *WalletQueries {
+	return &WalletQueries{GetWalletByUserId: getWalletByUserId}
 }

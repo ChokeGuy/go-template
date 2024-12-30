@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
+	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc/products"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/dto"
+	kafkaClient "gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 )
 
@@ -14,13 +16,15 @@ type CreateProductCmdHandler interface {
 }
 
 type createProductHandler struct {
-	log logger.Logger
-	cfg *config.Config
-	// kafkaProducer kafkaClient.Producer
+	log           logger.Logger
+	cfg           *config.Config
+	kafkaProducer kafkaClient.Producer
+	command       sqlc.Querier
+	querier       sqlc.Querier
 }
 
-func NewCreateProductHandler(log logger.Logger, cfg *config.Config) *createProductHandler {
-	return &createProductHandler{log: log, cfg: cfg}
+func NewCreateProductHandler(log logger.Logger, cfg *config.Config, kafkaProducer kafkaClient.Producer, command sqlc.Querier, querier sqlc.Querier) *createProductHandler {
+	return &createProductHandler{log: log, cfg: cfg, kafkaProducer: kafkaProducer, command: command, querier: querier}
 }
 
 func (c *createProductHandler) Handle(ctx context.Context, command *dto.CreateProductDto) error {

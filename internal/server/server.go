@@ -12,23 +12,20 @@ import (
 	"github.com/pkg/errors"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/db"
-	productHandler "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/handler"
-	productService "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/service"
-	walletHandler "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/wallets/handler"
 	walletService "gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/wallets/service"
+	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/group"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/middlewares"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/interceptors"
+	kafkaClient "gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/postgres"
 )
 
 type server struct {
-	log    logger.Logger
-	cfg    *config.Config
-	v      *validator.Validate
-	server *http.Server
-	// kafkaConn *kafka.Consumer
-	ps       *productService.ProductService
+	log      logger.Logger
+	cfg      *config.Config
+	v        *validator.Validate
+	server   *http.Server
 	ws       *walletService.WalletService
 	im       interceptors.InterceptorManager
 	writerDB *db.Store
@@ -64,20 +61,16 @@ func (s *server) Run() error {
 	s.log.Infof("writer postgres connected: %v", writerPgxConn.Stat().TotalConns())
 	defer writerPgxConn.Close()
 
-	// kafkaProducer := kafkaClient.NewProducer(s.log, s.cfg.KAFKA_BROKER)
-	// defer kafkaProducer.Close() // nolint: errcheck
+	kafkaProducer := kafkaClient.NewProducer(s.log, s.cfg.KAFKA_BROKER)
+	defer kafkaProducer.Close() // nolint: errcheck
 
 	s.server = &http.Server{
 		Addr: ":" + s.cfg.PORT,
 	}
 
-	// s.ps = productService.NewProductService(s.log, s.cfg, kafkaProducer)
-	s.ws = walletService.NewWalletService(s.log, s.cfg, s.writerDB, s.readerDB)
-
 	router := mux.NewRouter().PathPrefix(s.cfg.PREFIX_PATH).Subrouter()
 
-	productHandler.NewProductsHandlers(router, s.log, s.mw, s.cfg, s.ps, s.v, ctx).MapRoutes()
-	walletHandler.NewWalletsHandlers(router, s.log, s.mw, s.cfg, s.ws, s.v, ctx).MapRoutes()
+	group.InitGroup(router, s.log, s.mw, s.cfg, s.v, ctx, kafkaProducer, s.writerDB, s.readerDB)
 
 	s.server.Handler = router
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-playground/validator"
-	"github.com/segmentio/kafka-go"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
-	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc/products"
+	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/topics"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 )
 
@@ -16,17 +16,16 @@ const (
 )
 
 type ProductMessageProcessor struct {
-	log     logger.Logger
-	cfg     *config.Config
-	v       *validator.Validate
-	querier sqlc.Querier
+	log logger.Logger
+	cfg *config.Config
+	v   *validator.Validate
 }
 
 func NewProductMessageProcessor(log logger.Logger, cfg *config.Config, v *validator.Validate) *ProductMessageProcessor {
 	return &ProductMessageProcessor{log: log, cfg: cfg, v: v}
 }
 
-func (s *ProductMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.Reader, wg *sync.WaitGroup, workerID int) {
+func (s *ProductMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.Consumer, wg *sync.WaitGroup, workerID int) {
 	defer wg.Done()
 
 	for {
@@ -36,18 +35,18 @@ func (s *ProductMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.
 		default:
 		}
 
-		m, err := r.FetchMessage(ctx)
+		m, err := r.ReadMessage(-1)
 		if err != nil {
 			s.log.Warnf("workerID: %v, err: %v", workerID, err)
 			continue
 		}
 
-		s.logProcessMessage(m, workerID)
+		s.logProcessMessage(*m, workerID)
 
-		switch m.Topic {
+		switch *m.TopicPartition.Topic {
 		// case s.cfg.KafkaTopics.ProductCreate.TopicName:
 		// s.processCreateProduct(ctx, r, m)
-		case "product-create":
+		case topics.CREATE_PRODUCT_TOPIC:
 			s.processCreateProduct(ctx, r, m)
 		}
 	}

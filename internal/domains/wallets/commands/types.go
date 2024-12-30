@@ -6,6 +6,7 @@ import (
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
 	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc/wallets"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/wallets/dto"
+	kafkaClient "gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 )
 
@@ -18,9 +19,9 @@ type CreateWalletCmdHandler interface {
 }
 
 type createWalletHandler struct {
-	log     logger.Logger
-	cfg     *config.Config
-	command sqlc.Querier
-	querier sqlc.Querier
-	// kafkaProducer kafkaClient.Producer
+	log           logger.Logger
+	cfg           *config.Config
+	kafkaProducer kafkaClient.Producer
+	command       sqlc.Querier
+	querier       sqlc.Querier
 }

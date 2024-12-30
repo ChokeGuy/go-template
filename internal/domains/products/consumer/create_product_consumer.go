@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	"github.com/segmentio/kafka-go"
-	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc/products"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/products/dto"
 )
 
@@ -20,7 +19,7 @@ var (
 	retryOptions = []retry.Option{retry.Attempts(retryAttempts), retry.Delay(retryDelay), retry.DelayType(retry.BackOffDelay)}
 )
 
-func (s *ProductMessageProcessor) processCreateProduct(ctx context.Context, r *kafka.Reader, m kafka.Message) {
+func (s *ProductMessageProcessor) processCreateProduct(ctx context.Context, r *kafka.Consumer, m *kafka.Message) {
 	var msg *dto.CreateProductDto
 	if err := json.Unmarshal(m.Value, &msg); err != nil {
 		return
@@ -31,13 +30,13 @@ func (s *ProductMessageProcessor) processCreateProduct(ctx context.Context, r *k
 	}
 
 	if err := retry.Do(func() error {
-		_, err := s.querier.CreateProduct(ctx, sqlc.CreateProductParams{
-			ProductID:   msg.ProductID,
-			Name:        msg.Name,
-			Description: msg.Description,
-			Price:       msg.Price,
-		})
-		return err
+		// _, err := s.querier.CreateProduct(ctx, sqlc.CreateProductParams{
+		// 	ProductID:   msg.ProductID,
+		// 	Name:        msg.Name,
+		// 	Description: msg.Description,
+		// 	Price:       msg.Price,
+		// })
+		return nil
 	}, append(retryOptions, retry.Context(ctx))...); err != nil {
 		return
 	}

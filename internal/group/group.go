@@ -8,6 +8,7 @@ import (
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/db"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/middlewares"
+	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"
 )
 
@@ -18,9 +19,9 @@ func InitGroup(
 	cfg *config.Config,
 	v *validator.Validate,
 	ctx context.Context,
-	// kafkaProducer kafkaClient.Producer,
+	kafkaProducer kafka.Producer,
 	writerDB *db.Store,
 	readerDB *db.Store,
 ) {
-	walletGroup(router, log, mw, cfg, v, ctx, writerDB, readerDB)
+	walletGroup(router, log, mw, cfg, v, ctx, kafkaProducer, writerDB, readerDB)
 }

@@ -36,5 +36,5 @@ func (h *walletsHandlers) CreateWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpResponse.ResponseWithJson(w, http.StatusCreated, value)
+	httpResponse.ResponseWithJson(w, http.StatusAccepted, value)
 }

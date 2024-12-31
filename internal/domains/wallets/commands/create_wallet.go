@@ -25,10 +25,10 @@ func NewCreateWalletHandler(
 }
 
 func (c *createWalletHandler) Handle(ctx context.Context, createDto *dto.CreateWalletDto) (dto.CreateWalletResponseDto, error) {
-	// _, err := c.querier.GetWalletByUserId(ctx, createDto.UserID)
-	// if err != nil {
-	// 	return dto.CreateWalletResponseDto{}, err
-	// }
+	_, err := c.querier.GetWalletByUserId(ctx, createDto.UserID)
+	if err != nil {
+		return dto.CreateWalletResponseDto{}, err
+	}
 
 	response := dto.CreateWalletResponseDto{
 		UserID:    createDto.UserID,

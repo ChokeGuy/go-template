@@ -61,7 +61,13 @@ func (s *server) Run() error {
 	s.log.Infof("writer postgres connected: %v", writerPgxConn.Stat().TotalConns())
 	defer writerPgxConn.Close()
 
-	kafkaProducer := kafkaClient.NewProducer(s.log, s.cfg.KAFKA_BROKER)
+	kafkaProducer := kafkaClient.NewProducer(
+		s.log,
+		s.cfg.KAFKA_BROKER,
+		s.cfg.AWS_REGION,
+		s.cfg.AWS_ACCESS_KEY_ID,
+		s.cfg.AWS_SECRET_ACCESS_KEY,
+	)
 	defer kafkaProducer.Close() // nolint: errcheck
 
 	s.server = &http.Server{

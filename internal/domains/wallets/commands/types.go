@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/config"
-	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc/wallets"
+	sqlc "gitlab.rinznetwork.com/gocryptowallet/go-template/db/sqlc"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/internal/domains/wallets/dto"
 	kafkaClient "gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/kafka"
 	"gitlab.rinznetwork.com/gocryptowallet/go-template/pkg/logger"

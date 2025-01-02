@@ -34,18 +34,18 @@ func NewConsumerGroup(brokers string, groupID string, log logger.Logger) *consum
 }
 
 // GetNewKafkaReader create new kafka reader
-func (c *consumerGroup) GetNewKafkaReader(kafkaURL string, groupTopics []string, groupID string) (*kafka.Consumer, error) {
-	return NewKafkaReader(kafkaURL, groupTopics, groupID)
+func (c *consumerGroup) GetNewKafkaReader(kafkaURL string, groupTopics []string, groupID string, region string) (*kafka.Consumer, error) {
+	return NewKafkaReader(kafkaURL, groupTopics, groupID, region)
 }
 
 // GetNewKafkaWriter create new kafka producer
-func (c *consumerGroup) GetNewKafkaWriter() (*kafka.Producer, error) {
-	return NewKafkaWriter(c.Brokers)
+func (c *consumerGroup) GetNewKafkaWriter(region, accessKey, secretKey string) (*kafka.Producer, error) {
+	return NewKafkaWriter(c.Brokers, region, accessKey, secretKey)
 }
 
 // ConsumeTopic start consumer group with given worker and pool size
-func (c *consumerGroup) ConsumeTopic(ctx context.Context, groupTopics []string, poolSize int, worker Worker) {
-	r, err := c.GetNewKafkaReader(c.Brokers, groupTopics, c.GroupID)
+func (c *consumerGroup) ConsumeTopic(ctx context.Context, groupTopics []string, region string, poolSize int, worker Worker) {
+	r, err := c.GetNewKafkaReader(c.Brokers, groupTopics, c.GroupID, region)
 
 	if err != nil {
 		return

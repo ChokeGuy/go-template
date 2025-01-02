@@ -1,6 +1,6 @@
 version: "2"
 sql:
-  - schema: "db/migrations/wallets"
+  - schema: "db/migrations"
     # remember to change query dir
     queries: "db/queries/wallets.sql"
     engine: "postgresql"
@@ -8,7 +8,7 @@ sql:
       go:
         package: "sqlc"
         # remember to change out dir when gen domain
-        out: "db/sqlc/wallets"
+        out: "db/sqlc"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_interface: true

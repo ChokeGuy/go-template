@@ -17,8 +17,8 @@ type producer struct {
 }
 
 // NewProducer create new kafka producer
-func NewProducer(log logger.Logger, brokers string) *producer {
-	w, err := NewKafkaWriter(brokers)
+func NewProducer(log logger.Logger, brokers string, region, accessKey, secretKey string) *producer {
+	w, err := NewKafkaWriter(brokers, region, accessKey, secretKey)
 	if err != nil {
 		log.Fatalf("Failed to create producer: %s", err)
 	}
@@ -30,7 +30,7 @@ func (p *producer) PublishMessage(msgs *kafka.Message) error {
 	deliveryChan := make(chan kafka.Event)
 	err := p.w.Produce(msgs, deliveryChan)
 
-	<-deliveryChan
+	// <-deliveryChan
 
 	if err != nil {
 		return err

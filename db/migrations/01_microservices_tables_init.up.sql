@@ -1,6 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS citext;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-DROP TABLE IF EXISTS wallets CASCADE;
 
 CREATE TABLE wallets (
     wallet_id UUID PRIMARY KEY         DEFAULT uuid_generate_v4(),

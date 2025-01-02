@@ -1,5 +1,5 @@
 # Makefile
-ENV := $(CURDIR)/.env
+ENV := $(PWD)/.env
 
 # Environment variables for project
 include $(ENV)
@@ -11,19 +11,19 @@ sqlc:
 	sqlc generate
 
 migrateup:
-	migrate -path db/migrations/wallets -database "$(WRITER_POSTGRES_URL)" -verbose up
+	migrate -path db/migrations -database "$(POSTGRES_URL)" -verbose up
 
 migrateup1:
-	migrate -path db/migrations/wallets -database "$(WRITER_POSTGRES_URL)" -verbose up 1
+	migrate -path db/migrations -database "$(POSTGRES_URL)" -verbose up 1
 
 migratedown:
-	migrate -path db/migrations/wallets -database "$(WRITER_POSTGRES_URL)" -verbose down
+	migrate -path db/migrations -database "$(POSTGRES_URL)" -verbose down
 
 migratedown1:
-	migrate -path db/migrations/wallets -database "$(WRITER_POSTGRES_URL)" -verbose down 1
+	migrate -path db/migrations -database "$(POSTGRES_URL)" -verbose down 1
 
 migrateforce:
-	migrate -path db/migrations/wallets -database "$(WRITER_POSTGRES_URL)" -verbose force 1
+	migrate -path db/migrations -database "$(POSTGRES_URL)" -verbose force 1
 
 .PHONY: server sqlc migrateup migrateup1 migratedown migratedown1 migrateforce
 

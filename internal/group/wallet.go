@@ -37,7 +37,7 @@ func walletGroup(router *mux.Router,
 
 	log.Info("Starting Writer Kafka consumers")
 	cg := kafka.NewConsumerGroup(cfg.KAFKA_BROKER, cfg.KAFKA_GROUP_ID, log)
-	go cg.ConsumeTopic(ctx, getWalletConsumerGroupTopics(), consumer.PoolSize, walletMessageProcessor.ProcessMessages)
+	go cg.ConsumeTopic(ctx, getWalletConsumerGroupTopics(), cfg.AWS_REGION, consumer.PoolSize, walletMessageProcessor.ProcessMessages)
 
 	walletHandlers := handler.NewWalletsHandlers(router, log, mw, cfg, ws, v, ctx)
 	walletHandlers.MapRoutes()

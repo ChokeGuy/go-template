@@ -4,10 +4,26 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-// NewWriter create new configured kafka writer
-func NewKafkaWriter(brokers string) (*kafka.Producer, error) {
-	return kafka.NewProducer(&kafka.ConfigMap{
+func NewKafkaWriter(brokers string, region string, accessKey, secretKey string) (*kafka.Producer, error) {
+	tokenProvider, err := NewIAMTokenProvider(
+		region,
+		accessKey,
+		secretKey,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := tokenProvider.Token()
+
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers":  brokers,
+		"security.protocol":  "SASL_SSL",
+		"sasl.mechanisms":    "OAUTHBEARER",
 		"acks":               writerRequiredAcks,
 		"retries":            writerMaxAttempts,
 		"compression.type":   "snappy",
@@ -15,4 +31,11 @@ func NewKafkaWriter(brokers string) (*kafka.Producer, error) {
 		"request.timeout.ms": int(writerWriteTimeout.Milliseconds()),
 		"linger.ms":          0,
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	p.SetOAuthBearerToken(token)
+	return p, nil
 }
